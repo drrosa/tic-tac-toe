@@ -18,6 +18,14 @@
 
 
 	/*----- event listeners -----*/
-
+    resetGameButton.addEventListener("click", init);
+    document.getElementById("board").addEventListener("click", handleClick);
 
 	/*----- functions -----*/
+    function init() {
+        console.log("RESET");
+    }
+
+    function handleClick(event) {
+        console.log(event.target);
+    }
