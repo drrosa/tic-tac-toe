@@ -6,8 +6,8 @@
     }
 
     const COLORS = {
-        "1": "black",
-        "-1": "black",
+        "1": "green",
+        "-1": "blue",
         "null": "white",
     };
 
@@ -24,25 +24,76 @@
 
 
 	/*----- state variables -----*/
-    let board;
-    let winner;
-    let turn;
+    let board; // array that maps indeces from top-left to bottom-right square.
+    let winner; // holds the player value if there's a winner or 'T' for a tie.
+    let turn; // holds 1 or -1 depending on whose turn it is
 
 
 	/*----- cached elements  -----*/
     const gameStatusEl = document.querySelector("h1");
     const resetGameButton = document.querySelector("button");
+    const boardEls = document.querySelectorAll("#board > div");
+    const boardEl = document.getElementById("board");
 
 
 	/*----- event listeners -----*/
     resetGameButton.addEventListener("click", init);
-    document.getElementById("board").addEventListener("click", handleClick);
+
 
 	/*----- functions -----*/
+    init();
+
     function init() {
-        console.log("RESET");
+        boardEl.addEventListener("click", handlePlayerMove);
+        board = new Array(9).fill(null);
+        turn = 1;
+        winner = null;
+        render();
     }
 
-    function handleClick(event) {
-        console.log(event.target);
+    function handlePlayerMove(event) {
+        let i = parseInt(event.target.id);
+        if (!board[i]) {
+            board[i] = turn;
+            winner = checkWinner();
+            turn *= -1;
+            render();
+        }
+    }
+
+    function checkWinner() {
+        for (winCombo in WIN_COMBOS) {
+            cellValues = WIN_COMBOS[winCombo].map(idx => board[idx]);
+            if (cellValues.every(value => value === turn)) {
+                boardEl.removeEventListener("click", handlePlayerMove);
+                return turn;
+            }
+        }
+        if (!board.includes(null)) {
+            boardEl.removeEventListener("click", handlePlayerMove);
+            return "T";
+        }
+        return null;
+    }
+
+    function render() {
+        renderBoard();
+        renderMessage();
+    }
+
+    function renderBoard() {
+        board.forEach((playerId, i) => {
+            boardEls[i].innerText = MARKERS[playerId];
+            boardEls[i].style.backgroundColor = COLORS[playerId];
+        });
+    }
+
+    function renderMessage() {
+        if (winner === "T") {
+            gameStatusEl.innerText = "TIE GAME!";
+        } else {
+            let color = winner ? COLORS[winner] : COLORS[turn];
+            let msg = `<span style="color:${color}">${color.toUpperCase()}`;
+            gameStatusEl.innerHTML = winner ? `${msg}</span> Wins!` : `${msg}'s</span> Turn`;
+        }
     }
